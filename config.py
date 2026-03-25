@@ -8,13 +8,23 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-key-change-in-production')
     
     # Database
-    DB_HOST = os.getenv('DB_HOST', 'localhost')
-    DB_USER = os.getenv('DB_USER', 'root')
-    DB_PASSWORD = os.getenv('DB_PASSWORD', '')
-    DB_NAME = os.getenv('DB_NAME', 'dataextractor')
-    DB_PORT = os.getenv('DB_PORT', '3306')
-    
-    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    DATABASE_URL = os.getenv("DATABASE_URL")
+
+    if DATABASE_URL:
+        # Production (Render - PostgreSQL)
+        if DATABASE_URL.startswith("postgres://"):
+            DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+        SQLALCHEMY_DATABASE_URI = DATABASE_URL
+    else:
+        # Local (MySQL)
+        DB_HOST = os.getenv('DB_HOST', 'localhost')
+        DB_USER = os.getenv('DB_USER', 'root')
+        DB_PASSWORD = os.getenv('DB_PASSWORD', '')
+        DB_NAME = os.getenv('DB_NAME', 'dataextractor')
+        DB_PORT = os.getenv('DB_PORT', '3306')
+
+        SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Google API (optional – Playwright scraping does not require an API key)

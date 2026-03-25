@@ -62,7 +62,7 @@ class LinkedInExtractor(BaseExtractor):
                     
                 # Step 2: Visit each LinkedIn URL directly to extract public details
                 for url in linkedin_urls:
-                    if self.should_stop or self._saved_count >= adjusted_target:
+                    if self.should_stop or self._saved_count >= adjusted_target or self.has_reached_max_results():
                         break
                         
                     if url in visited_urls:

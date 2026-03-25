@@ -130,8 +130,8 @@ class GoogleMapsExtractor(BaseExtractor):
                 visited = set()          # normalised hrefs we've already clicked
                 no_new_rounds = 0
 
-                while self._saved_count < adjusted_target:
-                    if self.should_stop:
+                while self._saved_count < adjusted_target and not self.has_reached_max_results():
+                    if self.should_stop or self.has_reached_max_results():
                         print(f"[GoogleMaps] Stopped by user at count {self._saved_count}")
                         self.update_task_status('stopped', self._saved_count)
                         browser.close()

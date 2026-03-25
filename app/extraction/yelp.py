@@ -83,8 +83,8 @@ class YelpExtractor(BaseExtractor):
                 start = 0
                 page_num = 1
 
-                while self._saved_count < adjusted_target:
-                    if self.should_stop:
+                while self._saved_count < adjusted_target and not self.has_reached_max_results():
+                    if self.should_stop or self.has_reached_max_results():
                         print(f"[Yelp] Stopped by user at {self._saved_count}")
                         break
 
@@ -107,7 +107,7 @@ class YelpExtractor(BaseExtractor):
                     print(f"[Yelp] Found {len(biz_links)} listings on page {page_num}")
 
                     for biz_url in biz_links:
-                        if self.should_stop or self._saved_count >= adjusted_target:
+                        if self.should_stop or self._saved_count >= adjusted_target or self.has_reached_max_results():
                             break
 
                         try:

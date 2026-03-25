@@ -35,3 +35,5 @@ numba>=0.58
 llvmlite>=0.41
 
 gunicorn
+
+psycopg2-binary
