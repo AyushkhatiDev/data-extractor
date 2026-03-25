@@ -9,6 +9,25 @@ Read the project paper directly from the repository:
 - [DataExtractor copy.pdf](paper/DataExtractor%20copy.pdf)
 - [DataExtractor.pdf](paper/DataExtractor.pdf)
 
+## 🌐 Live Demo
+
+👉 https://data-extractor-1-laq7.onrender.com/
+
+> ⚠️ **Note on Demo Usage**
+>
+> - The live demo is provided for **educational and demonstration purposes only**.
+> - Due to infrastructure and deployment constraints, extraction workflows may not function consistently in the hosted environment.
+> - In some cases, you may only be able to run limited extraction attempts before session restrictions apply.
+> - Certain features (especially multi-source extraction and LLM pipelines) may be **partially disabled or unstable** due to environment conflicts.
+>
+> ⚙️ These limitations are specific to the hosted demo and **do not reflect the full capabilities of the system when run locally or in a properly configured environment**.
+>
+> 🚧 Fixes and stability improvements are currently in progress.
+
+## 🛠 Recommended Usage
+
+For full functionality and stable performance, it is recommended to run the system locally with proper configuration (Redis, database, and LLM setup).
+
 ## Important Notice
 
 - This Data Extractor project is for educational purposes only.
