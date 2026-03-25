@@ -15,7 +15,7 @@ webdriver-manager==4.0.1
 lxml~=5.3
 urllib3==2.2.0
 chardet==5.2.0
-charset-normalizer==3.3.2
+charset-normalizer>=3.4.0
 celery==5.3.4
 redis==5.0.1
 validators==0.22.0
