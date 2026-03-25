@@ -87,6 +87,13 @@ Default design preference in this project is local-first AI to avoid cloud API k
 ### Results View
 ![Results Page](docs/assets/d3.jpeg)
 
+## Paper
+
+Read the project paper directly from the repository:
+
+- [DataExtractor copy.pdf](paper/DataExtractor%20copy.pdf)
+- [DataExtractor.pdf](paper/DataExtractor.pdf)
+
 ## Project Structure
 
 ```text
