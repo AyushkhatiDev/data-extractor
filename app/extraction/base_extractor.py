@@ -142,11 +142,23 @@ class BaseExtractor(ABC):
                     
         return business_data
 
+    def has_reached_max_results(self):
+        """Return True when the task has already reached its hard record cap."""
+        max_results = int(self.task.max_results or 0)
+        if max_results <= 0:
+            return False
+        current_total = Business.query.filter_by(task_id=self.task_id).count()
+        return current_total >= max_results
+
     def save_business(self, business_data):
         """Save extracted business data to database with deduplication"""
         import json
         
         try:
+            # Enforce a hard cap at task.max_results regardless of extractor strategy.
+            if self.has_reached_max_results():
+                return None
+
             # Clean and validate data first
             business_data = self.validate_business_data(business_data)
 
@@ -320,3 +332,40 @@ class BaseExtractor(ABC):
             self.task.total_records = int(actual_count)
 
         db.session.commit()
+
+    @staticmethod
+    def trim_to_max_results(task_id):
+        """Delete excess records so the final count never exceeds task.max_results.
+
+        Removes the newest (highest-id) records first to keep the earliest
+        extracted data which is typically the most relevant.
+        """
+        task = ExtractionTask.query.get(task_id)
+        if not task:
+            return
+
+        max_results = int(task.max_results or 0)
+        if max_results <= 0:
+            return
+
+        actual_count = Business.query.filter_by(task_id=task_id).count()
+        if actual_count <= max_results:
+            return
+
+        excess = actual_count - max_results
+        # Find the IDs of the newest excess records
+        excess_records = (
+            Business.query
+            .filter_by(task_id=task_id)
+            .order_by(Business.id.desc())
+            .limit(excess)
+            .all()
+        )
+
+        for record in excess_records:
+            db.session.delete(record)
+
+        task.total_records = max_results
+        db.session.commit()
+        print(f"[Trim] Removed {excess} excess records for task {task_id} "
+              f"(was {actual_count}, now {max_results})")

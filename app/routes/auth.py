@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models import User
 from app import db
+from app.utils.demo_access import is_demo_locked_user, DEMO_LOCK_MESSAGE
 
 auth_bp = Blueprint('auth', __name__)
 

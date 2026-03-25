@@ -111,7 +111,12 @@ function startExtraction() {
         },
         error: function(xhr) {
             $('#startExtraction').prop('disabled', false).html('<i class="fas fa-play"></i> Start Extraction');
-            showToast('Error starting extraction: ' + (xhr.responseJSON?.error || xhr.statusText || 'unknown'), 'danger');
+            const apiError = xhr.responseJSON?.error || xhr.statusText || 'unknown';
+            if (xhr.status === 403 && xhr.responseJSON?.code === 'demo_locked') {
+                showToast(apiError, 'warning');
+                return;
+            }
+            showToast('Error starting extraction: ' + apiError, 'danger');
         }
     });
 }
@@ -164,6 +169,16 @@ function checkTaskStatus(taskId) {
             } else {
                 $('#taskStatus').html('<span style="color: var(--text-secondary);">' + status + '</span>');
             }
+        }).fail(function(xhr) {
+            if (xhr.status === 403 && xhr.responseJSON?.code === 'demo_locked') {
+                clearInterval(interval);
+                $('#stopContainer').hide();
+                $('#taskStatus').html('<i class="fas fa-lock" style="color: var(--warning);"></i> <span style="color: #fcd34d; font-weight: 600;">Extraction limit reached</span>');
+                showToast(xhr.responseJSON?.error || 'Extraction limit reached.', 'warning');
+                return;
+            }
+            clearInterval(interval);
+            showToast('Unable to fetch task status.', 'danger');
         });
     }, 2000);
 }

@@ -2,17 +2,19 @@ import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from flask import Blueprint, request, jsonify, current_app
-from flask_login import login_required
-from app.models import ExtractionTask, Business, BusinessEmbedding
+from flask_login import login_required, current_user
+from app.models import ExtractionTask, Business, BusinessEmbedding, User
 from app import db
 from datetime import datetime
 import threading
 import traceback
 from sqlalchemy import func
 from app.extraction.task_manager import task_manager, build_list_extractor
+from app.extraction.base_extractor import BaseExtractor
 from app.extraction.us_list_types import get_list_type_config
 from app.extraction.email_scraper import EmailScraper
 from app.utils.validators import validate_email
+from app.utils.demo_access import is_demo_locked_user, is_admin_user, DEMO_LOCK_MESSAGE
 
 extraction_bp = Blueprint('extraction', __name__)
 
@@ -28,6 +30,20 @@ ALLOWED_SELECTED_FIELDS = {
 DEFAULT_SELECTED_FIELDS = [
     'name', 'email', 'phone', 'website', 'location', 'owner',
 ]
+
+
+def _mark_demo_usage_if_needed(user):
+    """Mark a non-admin user as having consumed their one-time demo usage."""
+    if not user or is_admin_user(user):
+        return False
+
+    current_uses = int(user.extraction_uses or 0)
+    if current_uses >= 1:
+        return False
+
+    user.extraction_uses = 1
+    db.session.commit()
+    return True
 
 
 def _normalize_selected_fields(raw_selected_fields):
@@ -74,6 +90,11 @@ def _count_businesses_for_tasks(task_ids):
 @extraction_bp.route('/start', methods=['POST'])
 @login_required
 def start_extraction():
+    # Read a fresh user row to avoid stale session state around demo lock checks.
+    user = User.query.get(current_user.id)
+    if is_demo_locked_user(user):
+        return jsonify({'error': DEMO_LOCK_MESSAGE, 'code': 'demo_locked'}), 403
+
     data = request.form or request.json or {}
     keyword = data.get('keyword', '').strip()
     location = data.get('location', '').strip()
@@ -163,7 +184,7 @@ def start_extraction():
     app = current_app._get_current_object()
     thread = threading.Thread(
         target=run_extraction_in_background,
-        args=(app, task.id, source, ai_options)
+        args=(app, task.id, source, user.id, ai_options)
     )
     thread.daemon = True
     thread.start()
@@ -180,7 +201,7 @@ def start_extraction():
     }), 201
 
 
-def run_extraction_in_background(app, task_id, source, ai_options=None):
+def run_extraction_in_background(app, task_id, source, user_id, ai_options=None):
     """Run extraction in a background thread with Flask app context."""
     ai_options = ai_options or {}
     stop_event = task_manager.register_task(task_id)
@@ -329,6 +350,9 @@ def run_extraction_in_background(app, task_id, source, ai_options=None):
                                 task.completed_at = datetime.utcnow()
                             db.session.commit()
 
+            # Trim excess records so final count never exceeds max_results.
+            BaseExtractor.trim_to_max_results(task_id)
+
             # Keep persisted record count aligned with actual rows.
             task = ExtractionTask.query.get(task_id)
             if task:
@@ -347,6 +371,12 @@ def run_extraction_in_background(app, task_id, source, ai_options=None):
             enable_validation = ai_options.get('enable_validation', True)
             if enable_validation:
                 _run_email_validation_for_task(task_id)
+
+            # One-time demo lock: after a successful extraction, non-admin users are locked.
+            task = ExtractionTask.query.get(task_id)
+            if task and task.status == 'completed':
+                user = User.query.get(user_id)
+                _mark_demo_usage_if_needed(user)
 
         except Exception as e:
             traceback.print_exc()
@@ -530,6 +560,11 @@ def get_task_status(task_id):
     if (task.total_records or 0) != actual_total:
         task.total_records = actual_total
         db.session.commit()
+
+    # Redundant safety: if user hits completed status, ensure demo usage is consumed.
+    if task.status == 'completed':
+        user = User.query.get(current_user.id)
+        _mark_demo_usage_if_needed(user)
 
     return jsonify({
         'id': task.id,
