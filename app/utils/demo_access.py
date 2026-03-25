@@ -1,8 +1,7 @@
 DEMO_ADMIN_EMAIL = 'ayushiskhati305@gmail.com'
 DEMO_LOCK_MESSAGE = (
-    'Your extraction limit has expired. You can no longer extract data with '
-    'these credentials. To extract more data, please contact the owner at '
-    'ayushiskhati305@gmail.com'
+    'Your extraction limit has expired. You can no longer extract data. '
+    'Please contact the owner to extract more data.'
 )
 
 

@@ -2,8 +2,10 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
+from flask import request, jsonify
 from config import config
+from app.utils.demo_access import is_demo_locked_user, DEMO_LOCK_MESSAGE
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -36,6 +38,24 @@ def create_app(config_name='default'):
         if request.path.startswith('/api/'):
             return jsonify({'error': 'Authentication required'}), 401
         return redirect(url_for('auth.login', next=request.url))
+
+    @app.before_request
+    def enforce_demo_one_time_limit():
+        """Only block NEW extraction requests for demo-locked users.
+
+        Locked users can still browse pages, view past results, and export.
+        """
+        if not current_user.is_authenticated:
+            return None
+
+        if not is_demo_locked_user(current_user):
+            return None
+
+        # Only block starting new extractions.
+        if request.path == '/api/extraction/start' and request.method == 'POST':
+            return jsonify({'error': DEMO_LOCK_MESSAGE, 'code': 'demo_locked'}), 403
+
+        return None
     
     # Register blueprints
     from app.routes.main import main_bp
