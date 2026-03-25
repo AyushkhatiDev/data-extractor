@@ -87,8 +87,6 @@ Default design preference in this project is local-first AI to avoid cloud API k
 ### Results View
 ![Results Page](docs/assets/screenshot3.png)
 
-*(Drag and drop your actual images into the GitHub editor to replace these placeholders!)*
-
 ## Project Structure
 
 ```text
