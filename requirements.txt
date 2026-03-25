@@ -12,7 +12,7 @@ openpyxl==3.1.2
 playwright==1.40.0
 selenium==4.16.0
 webdriver-manager==4.0.1
-lxml==4.9.3
+lxml~=5.3
 urllib3==2.2.0
 chardet==5.2.0
 charset-normalizer==3.3.2
