@@ -2,6 +2,11 @@
 
 A production-minded Flask platform for multi-source business/contact extraction with optional local AI enrichment, validation, and export workflows.
 
+## Important Notice
+
+- This Data Extractor project is for educational purposes only.
+- Users are responsible for complying with website terms, privacy rules, and applicable laws when running extraction workflows.
+
 ## Overview
 
 Data Extractor helps teams collect structured leads and organization records from multiple public sources, validate contact quality, and export clean datasets.
@@ -37,6 +42,32 @@ Core goals:
 - Queue/cache: Redis (Celery-ready workflow)
 - Scraping stack: Playwright, BeautifulSoup, utility crawlers
 - AI stack: Local Ollama / LangExtract (primary), optional OpenAI-compatible or on-prem local model fallback
+
+## AI and LLM Stack Used
+
+This project uses the following AI/LLM components:
+
+- Primary LLM extraction path:
+  - LangExtract
+  - Ollama (local model serving)
+- Primary model configured:
+  - Qwen-2.5-VL-7B-Instruct
+- Fallback model configured:
+  - Llama-3.1-8B-Instruct
+- Additional fallback options:
+  - OpenAI-compatible endpoint support
+  - Optional on-prem local model path
+  - Regex fallback for resilience when LLMs are unavailable
+- AI/ML utilities:
+  - Sentence-Transformers (semantic embeddings)
+  - Haystack-AI (retrieval and search workflows)
+  - Crawl4AI and Trafilatura (AI-assisted crawling/content extraction)
+
+Default design preference in this project is local-first AI to avoid cloud API key dependency.
+
+## Demo
+
+Demo available upon request.
 
 ## Project Structure
 
