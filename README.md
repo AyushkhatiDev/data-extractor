@@ -79,13 +79,13 @@ Default design preference in this project is local-first AI to avoid cloud API k
 ## Screenshots / Demo
 
 ### Extraction Setup & Dashboard
-![Dashboard Setup](docs/assets/screenshot1.png)
+![Dashboard Setup](docs/assets/d1.jpeg)
 
 ### Extraction Task Monitoring
-![Task Dashboard](docs/assets/screenshot2.png)
+![Task Dashboard](docs/assets/d2.jpeg)
 
 ### Results View
-![Results Page](docs/assets/screenshot3.png)
+![Results Page](docs/assets/d3.jpeg)
 
 ## Project Structure
 
