@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Medicare Care Compare - Nursing Homes",
+    "url": "https://www.medicare.gov/care-compare/?providerType=NursingHome",
+    "source_type": "federal_directory",
+    "notes": "Primary federal entry point for nursing home profiles"
+  },
+  {
+    "name": "CMS Nursing Home Data",
+    "url": "https://data.medicare.gov/data/nursing-home-compare",
+    "source_type": "federal_open_data",
+    "notes": "Authoritative dataset page that can be used for further URL discovery"
+  },
+  {
+    "name": "AHCA/NCAL",
+    "url": "https://www.ahcancal.org/",
+    "source_type": "industry_association",
+    "notes": "American Health Care Association / National Center for Assisted Living"
+  },
+  {
+    "name": "LeadingAge",
+    "url": "https://leadingage.org/",
+    "source_type": "industry_association",
+    "notes": "National nonprofit association for aging services providers"
+  },
+  {
+    "name": "Florida Nursing Homes",
+    "url": "https://www.floridahealth.gov/licensing-and-regulation/nursing-homes/index.html",
+    "source_type": "state_health_department",
+    "state": "FL"
+  },
+  {
+    "name": "Texas Nursing Facilities",
+    "url": "https://www.hhs.texas.gov/services/health/long-term-care/nursing-facilities",
+    "source_type": "state_health_department",
+    "state": "TX"
+  },
+  {
+    "name": "California Nursing Home Search",
+    "url": "https://www.cdph.ca.gov/Programs/CHCQ/LCP/Pages/NursingHomeSearch.aspx",
+    "source_type": "state_health_department",
+    "state": "CA"
+  },
+  {
+    "name": "New York Nursing Home Profiles",
+    "url": "https://profiles.health.ny.gov/nursing_home/",
+    "source_type": "state_health_department",
+    "state": "NY"
+  },
+  {
+    "name": "Missouri Nursing Home Program",
+    "url": "https://health.mo.gov/safety/nursinghomes/",
+    "source_type": "state_health_department",
+    "state": "MO"
+  },
+  {
+    "name": "Illinois Long-Term Care",
+    "url": "https://dph.illinois.gov/topics-services/health-care-regulation/long-term-care.html",
+    "source_type": "state_health_department",
+    "state": "IL"
+  },
+  {
+    "name": "Pennsylvania Nursing Care Facilities",
+    "url": "https://www.health.pa.gov/topics/facilities/Nursing%20Care%20Facilities/Pages/Nursing-Care-Facilities.aspx",
+    "source_type": "state_health_department",
+    "state": "PA"
+  },
+  {
+    "name": "Nebraska Nursing Facilities",
+    "url": "https://dhhs.ne.gov/Pages/Nursing-Facilities.aspx",
+    "source_type": "state_health_department",
+    "state": "NE"
+  },
+  {
+    "name": "Delaware Nursing Facilities",
+    "url": "https://dhss.delaware.gov/dhss/dltcrp/facilities.html",
+    "source_type": "state_health_department",
+    "state": "DE"
+  },
+  {
+    "name": "Rhode Island Nursing Facilities",
+    "url": "https://health.ri.gov/healthcare/facilities/nursinghomes/",
+    "source_type": "state_health_department",
+    "state": "RI"
+  },
+  {
+    "name": "Washington Long-Term Services",
+    "url": "https://www.hca.wa.gov/health-care-services-supports/long-term-services-and-supports",
+    "source_type": "state_health_department",
+    "state": "WA"
+  }
+]

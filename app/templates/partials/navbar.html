@@ -1,0 +1,43 @@
+<nav class="premium-navbar" id="premiumNavbar">
+  <div class="navbar-inner">
+    <a class="nav-brand" href="/">
+      <div class="brand-icon"><i class="fas fa-database"></i></div>
+      <span class="brand-text">DataExtractor</span>
+    </a>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/" class="{{ 'active' if request.endpoint == 'main.index' }}"><i class="fas fa-rocket"></i> Extract</a></li>
+      <li><a href="/dashboard" class="{{ 'active' if request.endpoint == 'main.dashboard' }}"><i class="fas fa-chart-bar"></i> Dashboard</a></li>
+      <li><a href="/results" class="{{ 'active' if request.endpoint == 'main.results' }}"><i class="fas fa-table"></i> Results</a></li>
+    </ul>
+
+    <div class="nav-right">
+      {% if current_user.is_authenticated %}
+      <div class="user-dropdown" id="userDropdown">
+        <button class="user-btn" type="button">
+          <div class="user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <span>{{ current_user.full_name }}</span>
+          <i class="fas fa-chevron-down" style="font-size:11px; opacity:0.5;"></i>
+        </button>
+        <div class="dropdown-menu-dark">
+          <span class="dropdown-item-text"><i class="fas fa-envelope me-2"></i>{{ current_user.email }}</span>
+          <hr class="dropdown-divider">
+          <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </div>
+      </div>
+      {% else %}
+      <a class="login-btn" href="{{ url_for('auth.login') }}">
+        <i class="fas fa-sign-in-alt"></i> Sign In
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</nav>

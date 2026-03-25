@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+
+{% block title %}Results — DataExtractor Premium{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header fade-in-up" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <h2>
+            <span class="header-icon-wrapper"><i class="fas fa-table"></i></span>
+            Extraction Results
+        </h2>
+        <p id="taskMeta" style="margin-top: 4px;">Select a task to view results.</p>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center;" id="exportButtons">
+        <a id="exportCsvBtn" href="#" class="btn-success-dark">
+            <i class="fas fa-file-csv"></i> Export CSV
+        </a>
+        <a id="exportExcelBtn" href="#" class="btn-success-dark">
+            <i class="fas fa-file-excel"></i> Export Excel
+        </a>
+    </div>
+</div>
+
+<!-- Column Filter Bar -->
+<div id="columnFilterBar" class="glass-card fade-in-up" style="margin-bottom: 24px; display: none;">
+    <div class="card-body" style="padding: 16px 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-filter" style="color: var(--accent-violet); font-size: 14px;"></i>
+                <span style="color: var(--text-secondary); font-weight: 600; font-size: 14px;">Show Columns:</span>
+            </div>
+            <div id="columnCheckboxes" style="display: flex; flex-wrap: wrap; gap: 6px; flex: 1; justify-content: center;"></div>
+            <div style="display: flex; gap: 6px;">
+                <button id="colSelectAll" class="btn-sm" style="padding: 4px 10px; font-size: 12px; border-radius: 6px; background: rgba(139,92,246,.12); color: var(--accent-violet); border: 1px solid rgba(139,92,246,.25); cursor: pointer;" title="Select All">
+                    <i class="fas fa-check-double"></i> All
+                </button>
+                <button id="colDeselectAll" class="btn-sm" style="padding: 4px 10px; font-size: 12px; border-radius: 6px; background: rgba(239,68,68,.10); color: #ef4444; border: 1px solid rgba(239,68,68,.25); cursor: pointer;" title="Deselect All">
+                    <i class="fas fa-times"></i> None
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Semantic Search Section -->
+<div id="semanticSearchSection" class="glass-card fade-in-up" style="margin-bottom: 24px; display: none;">
+    <div class="card-header">
+        <div class="header-icon" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+            <i class="fas fa-brain"></i>
+        </div>
+        <h5>AI Semantic Search</h5>
+    </div>
+    <div class="card-body">
+        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 14px;">
+            Search results using natural language — powered by AI embeddings.
+        </p>
+        <div style="display: flex; gap: 12px; align-items: stretch;">
+            <div class="input-wrapper" style="flex: 1;">
+                <i class="fas fa-search input-icon"></i>
+                <input type="text" class="form-control" id="semanticQuery"
+                       placeholder='e.g., "Italian restaurants with outdoor seating"'>
+            </div>
+            <button class="btn-premium" id="btnSemanticSearch" onclick="runSemanticSearch()">
+                <i class="fas fa-magic"></i> Search
+            </button>
+        </div>
+        <div id="semanticResults" style="margin-top: 16px;"></div>
+    </div>
+</div>
+
+<!-- Results Table -->
+<div class="glass-card fade-in-up">
+    <div class="card-body" style="padding: 0;">
+        <div style="overflow-x: auto;">
+            <table id="resultsTable" class="premium-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Website</th>
+                        <th>Phone</th>
+                        <th>Location</th>
+                        <th>Owner</th>
+                        <th>Source</th>
+                        <th>Confidence</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                    <tr>
+                        <td colspan="9">
+                            <div class="empty-state">
+                                <div class="empty-icon"><i class="fas fa-search"></i></div>
+                                <h4>Loading results...</h4>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let currentTaskId = null;
+  let resultsDataTable = null;
+
+  // Column definitions: key → header label, data-col-index (0-based th position)
+  const COLUMN_DEFS = [
+    { key: 'name',     label: 'Name',       icon: 'fa-building',      idx: 1 },
+    { key: 'email',    label: 'Email',      icon: 'fa-envelope',      idx: 2 },
+    { key: 'website',  label: 'Website',    icon: 'fa-globe',         idx: 3 },
+    { key: 'phone',    label: 'Phone',      icon: 'fa-phone',         idx: 4 },
+    { key: 'location', label: 'Location',   icon: 'fa-map-marker-alt',idx: 5 },
+    { key: 'owner',    label: 'Owner',      icon: 'fa-user-tie',      idx: 6 },
+  ];
+
+  function buildFieldsParam(fields) {
+    if (!Array.isArray(fields) || fields.length === 0) return '';
+    return `?fields=${encodeURIComponent(fields.join(','))}`;
+  }
+
+  function setChipStyle(chip, checked) {
+    chip.style.background = checked ? 'rgba(139,92,246,.08)' : 'rgba(100,100,100,.06)';
+    chip.style.borderColor = checked ? 'rgba(139,92,246,.2)' : 'rgba(100,100,100,.15)';
+    chip.style.opacity = checked ? '1' : '0.55';
+  }
+
+  function setExportButtonsState(enabled) {
+    ['exportCsvBtn', 'exportExcelBtn'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      btn.style.pointerEvents = enabled ? '' : 'none';
+      btn.style.opacity = enabled ? '1' : '0.5';
+      btn.title = enabled ? '' : 'Select at least one field to export';
+    });
+  }
+
+  function getCheckedFields() {
+    const checked = [];
+    document.querySelectorAll('#columnCheckboxes input[type=checkbox]:checked').forEach(cb => {
+      checked.push(cb.value);
+    });
+    return checked;
+  }
+
+  function updateExportLinks() {
+    if (!currentTaskId) return;
+    const fields = getCheckedFields();
+    if (!fields.length) {
+      document.getElementById('exportCsvBtn').href = '#';
+      document.getElementById('exportExcelBtn').href = '#';
+      setExportButtonsState(false);
+      return;
+    }
+
+    const param = buildFieldsParam(fields);
+    document.getElementById('exportCsvBtn').href = `/api/export/csv/${currentTaskId}${param}`;
+    document.getElementById('exportExcelBtn').href = `/api/export/excel/${currentTaskId}${param}`;
+    setExportButtonsState(true);
+  }
+
+  function applyColumnVisibility(col, visible) {
+    if (resultsDataTable) {
+      resultsDataTable.column(col.idx).visible(visible, false);
+      return;
+    }
+
+    // Fallback before DataTable initialization.
+    const th = document.querySelector(`#resultsTable thead th:nth-child(${col.idx + 1})`);
+    if (th) th.style.display = visible ? '' : 'none';
+    document.querySelectorAll(`#resultsTable tbody tr`).forEach(tr => {
+      const td = tr.children[col.idx];
+      if (td) td.style.display = visible ? '' : 'none';
+    });
+  }
+
+  function toggleColumnVisibility() {
+    COLUMN_DEFS.forEach(col => {
+      const cb = document.querySelector(`#columnCheckboxes input[value="${col.key}"]`);
+      const visible = cb ? cb.checked : true;
+      applyColumnVisibility(col, visible);
+    });
+
+    if (resultsDataTable) {
+      resultsDataTable.columns.adjust().draw(false);
+    }
+
+    updateExportLinks();
+  }
+
+  function initColumnFilters() {
+    const container = document.getElementById('columnCheckboxes');
+    container.innerHTML = '';
+    COLUMN_DEFS.forEach(col => {
+      const id = `colFilter_${col.key}`;
+      const chip = document.createElement('label');
+      chip.setAttribute('for', id);
+      chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;border:1px solid rgba(139,92,246,.2);background:rgba(139,92,246,.08);color:var(--text-secondary);transition:all .2s;user-select:none;';
+      chip.innerHTML = `<input type="checkbox" id="${id}" value="${col.key}" checked style="accent-color:#8b5cf6;cursor:pointer;"><i class="fas ${col.icon}" style="font-size:11px;color:var(--accent-violet);"></i> ${col.label}`;
+      container.appendChild(chip);
+
+      chip.querySelector('input').addEventListener('change', function() {
+        setChipStyle(chip, this.checked);
+        toggleColumnVisibility();
+      });
+    });
+
+    document.getElementById('colSelectAll').addEventListener('click', () => {
+      container.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        cb.checked = true;
+        setChipStyle(cb.closest('label'), true);
+      });
+      toggleColumnVisibility();
+    });
+    document.getElementById('colDeselectAll').addEventListener('click', () => {
+      container.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        cb.checked = false;
+        setChipStyle(cb.closest('label'), false);
+      });
+      toggleColumnVisibility();
+    });
+
+    document.getElementById('columnFilterBar').style.display = 'block';
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const pathParts = window.location.pathname.split('/');
+  const taskId = params.get('task_id') || pathParts[pathParts.length - 1];
+
+  if (taskId && taskId !== 'results') {
+    currentTaskId = taskId;
+    document.getElementById('semanticSearchSection').style.display = 'block';
+    
+    fetch(`/api/extraction/tasks/${taskId}`)
+      .then(r => r.json())
+      .then(data => {
+        const selectedFields = Array.isArray(data.selected_fields) ? data.selected_fields : [];
+        const fieldsParam = buildFieldsParam(selectedFields);
+        document.getElementById('exportCsvBtn').href = `/api/export/csv/${taskId}${fieldsParam}`;
+        document.getElementById('exportExcelBtn').href = `/api/export/excel/${taskId}${fieldsParam}`;
+
+        const sourceLabel = data.source === 'ai_extract' 
+          ? '<span class="source-badge" style="margin-left: 8px; background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(109,40,217,0.2)); border-color: rgba(139,92,246,0.4);"><i class="fas fa-brain"></i> AI Extract</span>'
+          : `<span class="source-badge" style="margin-left: 8px;"><i class="fas fa-globe"></i> ${data.source}</span>`;
+        
+        document.getElementById('taskMeta').innerHTML =
+          `Task <strong style="color: var(--text-primary);">#${data.id}</strong> — <span style="color: var(--accent-violet);">"${data.keyword}"</span> in ${data.location} ${sourceLabel} — <strong style="color: var(--text-primary);">${data.total_records}</strong> records`;
+
+        const tbody = document.getElementById('resultsBody');
+        if (!data.businesses || !data.businesses.length) {
+          tbody.innerHTML = `<tr><td colspan="9">
+            <div class="empty-state">
+              <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+              <h4>No results found</h4>
+              <p>This extraction didn't return any business data.</p>
+            </div>
+          </td></tr>`;
+          return;
+        }
+        
+        tbody.innerHTML = data.businesses.map((b, i) => {
+          // Confidence badge
+          let confidenceBadge = '<span style="color: var(--text-tertiary);">—</span>';
+          if (b.confidence_score != null) {
+            const pct = Math.round(b.confidence_score * 100);
+            const color = pct >= 70 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#ef4444';
+            confidenceBadge = `<span style="color: ${color}; font-weight: 600;">${pct}%</span>`;
+          }
+
+          // Social links icons
+          let socialHtml = '';
+          if (b.social_links) {
+            const sl = b.social_links;
+            if (sl.linkedin) socialHtml += `<a href="${sl.linkedin}" target="_blank" style="color: #0077b5; margin-right: 6px;" title="LinkedIn"><i class="fab fa-linkedin"></i></a>`;
+            if (sl.twitter) socialHtml += `<a href="${sl.twitter}" target="_blank" style="color: #1da1f2; margin-right: 6px;" title="Twitter"><i class="fab fa-twitter"></i></a>`;
+            if (sl.facebook) socialHtml += `<a href="${sl.facebook}" target="_blank" style="color: #4267B2; margin-right: 6px;" title="Facebook"><i class="fab fa-facebook"></i></a>`;
+          }
+
+          // Name with optional social links
+          let nameHtml = b.name 
+            ? `<strong style="color: var(--text-primary);">${b.name}</strong>` 
+            : '<span style="color: var(--text-tertiary);">—</span>';
+          if (socialHtml) {
+            nameHtml += `<br><span style="margin-top: 4px; display: inline-block;">${socialHtml}</span>`;
+          }
+
+          let websiteHtml = '<span style="color: var(--text-tertiary);">—</span>';
+          try {
+            if (b.website) {
+              websiteHtml = `<a href="${b.website}" target="_blank" style="color: var(--accent-violet);"><i class="fas fa-external-link-alt" style="margin-right:4px; font-size:11px;"></i>${new URL(b.website).hostname}</a>`;
+            }
+          } catch(e) {
+            if (b.website) websiteHtml = `<a href="${b.website}" target="_blank" style="color: var(--accent-violet);">${b.website}</a>`;
+          }
+
+          return `
+          <tr>
+            <td style="font-weight: 600; color: var(--text-primary);">${i + 1}</td>
+            <td style="min-width: 180px;">${nameHtml}</td>
+            <td>${b.email ? `<a href="mailto:${b.email}" style="color: var(--accent-violet);">${b.email}</a>` : '<span style="color: var(--text-tertiary);">—</span>'}</td>
+            <td>${websiteHtml}</td>
+            <td>${b.phone || '<span style="color: var(--text-tertiary);">—</span>'}</td>
+            <td>${b.location || '<span style="color: var(--text-tertiary);">—</span>'}</td>
+            <td>${b.owner ? `<span style="color: var(--text-primary);"><i class="fas fa-user-tie" style="margin-right:4px; font-size:11px; color: var(--accent-violet);"></i>${b.owner}</span>` : '<span style="color: var(--text-tertiary);">—</span>'}</td>
+            <td><span class="source-badge">${b.source || '—'}</span></td>
+            <td>${confidenceBadge}</td>
+          </tr>`;
+        }).join('');
+
+        const defaultPageLength = Math.min(Math.max(data.businesses.length, 25), 100);
+        
+        resultsDataTable = $('#resultsTable').DataTable({
+          pageLength: defaultPageLength,
+          lengthMenu: [[25, 50, 100, -1], [25, 50, 100, 'All']],
+          order: [[0, 'asc']],
+          language: {
+            emptyTable: 'No results found',
+            zeroRecords: 'No matching records'
+          }
+        });
+
+        // Init column filter bar after table is rendered
+        initColumnFilters();
+
+        // Pre-check only selected fields if task has field selection
+        if (selectedFields.length > 0) {
+          document.querySelectorAll('#columnCheckboxes input[type=checkbox]').forEach(cb => {
+            const shouldCheck = selectedFields.includes(cb.value);
+            cb.checked = shouldCheck;
+            setChipStyle(cb.closest('label'), shouldCheck);
+          });
+          toggleColumnVisibility();
+        } else {
+          updateExportLinks();
+        }
+
+        // Auto-generate embeddings for AI search
+        generateEmbeddings(taskId);
+      })
+      .catch(err => {
+        document.getElementById('resultsBody').innerHTML = `<tr><td colspan="9">
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h4>Error loading results</h4>
+            <p>Please go back and try again.</p>
+          </div>
+        </td></tr>`;
+      });
+  } else {
+    document.getElementById('resultsBody').innerHTML = `<tr><td colspan="9">
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-hand-pointer"></i></div>
+        <h4>No task selected</h4>
+        <p>Select a task from the dashboard to view its results.</p>
+      </div>
+    </td></tr>`;
+    document.getElementById('exportButtons').style.display = 'none';
+    document.getElementById('semanticSearchSection').style.display = 'none';
+  }
+
+  function generateEmbeddings(taskId) {
+    fetch('/api/ai/embed', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({task_id: parseInt(taskId)})
+    }).catch(() => {});
+  }
+
+  function runSemanticSearch() {
+    const query = document.getElementById('semanticQuery').value.trim();
+    if (!query || !currentTaskId) return;
+
+    const btn = document.getElementById('btnSemanticSearch');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+    btn.disabled = true;
+
+    fetch('/api/ai/search', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({query: query, task_id: parseInt(currentTaskId), top_k: 10})
+    })
+    .then(r => r.json())
+    .then(data => {
+      btn.innerHTML = '<i class="fas fa-magic"></i> Search';
+      btn.disabled = false;
+
+      const container = document.getElementById('semanticResults');
+      if (data.error) {
+        container.innerHTML = `<div class="premium-alert warning"><i class="fas fa-exclamation-triangle"></i> ${data.error}</div>`;
+        return;
+      }
+
+      if (!data.results || !data.results.length) {
+        container.innerHTML = '<div class="premium-alert info"><i class="fas fa-info-circle"></i> No matching results found. Try a different query.</div>';
+        return;
+      }
+
+      let html = '<div style="display: grid; gap: 12px;">';
+      data.results.forEach((r, i) => {
+        const pct = Math.round(r.relevance_score * 100);
+        const color = pct >= 70 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#ef4444';
+        html += `
+          <div style="padding: 14px 18px; background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.15); border-radius: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <strong style="color: var(--text-primary);">${r.name || r.website || r.email || 'Business #' + r.id}</strong>
+              <span style="color: ${color}; font-weight: 600; font-size: 13px;">${pct}% match</span>
+            </div>
+            <div style="color: var(--text-secondary); font-size: 13px;">
+              ${r.email ? '<i class="fas fa-envelope" style="margin-right: 4px;"></i>' + r.email + ' &nbsp;' : ''}
+              ${r.phone ? '<i class="fas fa-phone" style="margin-right: 4px;"></i>' + r.phone + ' &nbsp;' : ''}
+              ${r.location ? '<i class="fas fa-map-marker-alt" style="margin-right: 4px;"></i>' + r.location : ''}
+            </div>
+          </div>`;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    })
+    .catch(err => {
+      btn.innerHTML = '<i class="fas fa-magic"></i> Search';
+      btn.disabled = false;
+      document.getElementById('semanticResults').innerHTML = '<div class="premium-alert danger"><i class="fas fa-times-circle"></i> Search failed. AI services may not be available.</div>';
+    });
+  }
+
+  // Allow Enter key for semantic search
+  document.getElementById('semanticQuery')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') runSemanticSearch();
+  });
+</script>
+{% endblock %}

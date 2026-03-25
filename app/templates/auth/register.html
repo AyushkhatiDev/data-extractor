@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register — DataExtractor Premium</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            background: #0f0c29;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            overflow: hidden;
+        }
+
+        .bg-particles {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        }
+        .bg-particles span {
+            position: absolute; border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            animation: float-up linear infinite;
+        }
+        @keyframes float-up {
+            0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+            10%  { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* ── Left branding ── */
+        .brand-panel {
+            flex: 1; display: flex; flex-direction: column;
+            justify-content: center; padding: 60px;
+            position: relative; z-index: 1;
+        }
+        .brand-panel .logo {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 48px;
+        }
+        .brand-panel .logo-icon {
+            width: 52px; height: 52px; border-radius: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; color: #fff;
+        }
+        .brand-panel .logo-text { font-size: 26px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+        .brand-panel h1 { font-size: 42px; font-weight: 800; color: #fff; line-height: 1.15; margin-bottom: 18px; }
+        .brand-panel h1 span { color: #a78bfa; }
+        .brand-panel p { font-size: 17px; color: rgba(255,255,255,0.6); line-height: 1.7; max-width: 440px; }
+
+        .features { margin-top: 42px; display: flex; flex-direction: column; gap: 18px; }
+        .features .feat { display: flex; align-items: center; gap: 14px; color: rgba(255,255,255,0.75); font-size: 15px; }
+        .feat-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: rgba(255,255,255,0.08); display: flex;
+            align-items: center; justify-content: center; font-size: 16px;
+            color: #a78bfa; flex-shrink: 0;
+        }
+
+        /* ── Right register card ── */
+        .login-panel {
+            flex: 1; display: flex; align-items: center;
+            justify-content: center; padding: 40px; position: relative; z-index: 1;
+        }
+        .login-card {
+            width: 100%; max-width: 440px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px; padding: 44px 40px;
+        }
+        .login-card h2 { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+        .login-card .subtitle { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 28px; }
+
+        .flash-msg {
+            padding: 12px 16px; border-radius: 10px; font-size: 13px;
+            margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+        }
+        .flash-msg.danger  { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.25); }
+        .flash-msg.success { background: rgba(34,197,94,0.15);  color: #86efac; border: 1px solid rgba(34,197,94,0.25); }
+        .flash-msg.warning { background: rgba(234,179,8,0.15);  color: #fde047; border: 1px solid rgba(234,179,8,0.25); }
+        .flash-msg.info    { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.25); }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block; font-size: 13px; font-weight: 500;
+            color: rgba(255,255,255,0.7); margin-bottom: 8px;
+        }
+        .input-wrapper { position: relative; }
+        .input-wrapper i {
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            color: rgba(255,255,255,0.3); font-size: 15px;
+        }
+        .input-wrapper input {
+            width: 100%; padding: 14px 16px 14px 46px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; color: #fff; font-size: 15px;
+            font-family: 'Inter', sans-serif; outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        .input-wrapper input::placeholder { color: rgba(255,255,255,0.3); }
+        .input-wrapper input:focus {
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 3px rgba(167,139,250,0.15);
+        }
+        .toggle-pw {
+            position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; color: rgba(255,255,255,0.3);
+            cursor: pointer; font-size: 15px;
+        }
+        .toggle-pw:hover { color: rgba(255,255,255,0.6); }
+
+        .btn-login {
+            width: 100%; padding: 15px; margin-top: 8px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none; border-radius: 12px; color: #fff;
+            font-size: 16px; font-weight: 600; cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Inter', sans-serif; letter-spacing: 0.3px;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102,126,234,0.4);
+        }
+        .btn-login:active { transform: translateY(0); }
+
+        .divider {
+            display: flex; align-items: center; gap: 16px;
+            margin: 24px 0; color: rgba(255,255,255,0.25); font-size: 13px;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1);
+        }
+
+        .register-link { text-align: center; color: rgba(255,255,255,0.5); font-size: 14px; }
+        .register-link a { color: #a78bfa; text-decoration: none; font-weight: 600; }
+        .register-link a:hover { text-decoration: underline; }
+
+        .premium-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, rgba(234,179,8,0.2), rgba(234,179,8,0.05));
+            border: 1px solid rgba(234,179,8,0.25); border-radius: 20px;
+            padding: 6px 14px; font-size: 12px; font-weight: 600;
+            color: #fbbf24; margin-bottom: 20px;
+        }
+
+        @media (max-width: 960px) {
+            body { flex-direction: column; }
+            .brand-panel { padding: 40px 30px 20px; text-align: center; align-items: center; }
+            .brand-panel h1 { font-size: 30px; }
+            .features { display: none; }
+            .login-panel { padding: 20px; }
+            .login-card { padding: 36px 28px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-particles" id="particles"></div>
+
+<div class="brand-panel">
+    <div class="logo">
+        <div class="logo-icon"><i class="fas fa-database"></i></div>
+        <div class="logo-text">DataExtractor</div>
+    </div>
+    <h1>Start Extracting <span>Today</span></h1>
+    <p>Create your premium account and unlock unlimited business data extraction, lead generation & export tools.</p>
+
+    <div class="features">
+        <div class="feat">
+            <div class="feat-icon"><i class="fas fa-bolt"></i></div>
+            Instant access after sign-up
+        </div>
+        <div class="feat">
+            <div class="feat-icon"><i class="fas fa-infinity"></i></div>
+            Unlimited extractions
+        </div>
+        <div class="feat">
+            <div class="feat-icon"><i class="fas fa-shield-alt"></i></div>
+            Secure & encrypted data
+        </div>
+        <div class="feat">
+            <div class="feat-icon"><i class="fas fa-headset"></i></div>
+            Priority support
+        </div>
+    </div>
+</div>
+
+<div class="login-panel">
+    <div class="login-card">
+        <div class="premium-badge"><i class="fas fa-crown"></i> Premium Access</div>
+        <h2>Create account</h2>
+        <p class="subtitle">Fill in the details to get started</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-msg {{ category if category != 'message' else 'info' }}">
+                        <i class="fas fa-{% if category == 'danger' %}exclamation-circle{% elif category == 'success' %}check-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="full_name" name="full_name" placeholder="John Doe" required autofocus>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" name="email" placeholder="you@company.com" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" name="password" placeholder="Min 6 characters" required minlength="6">
+                    <button type="button" class="toggle-pw" onclick="togglePassword('password','pw-icon1')">
+                        <i class="fas fa-eye" id="pw-icon1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password" required minlength="6">
+                    <button type="button" class="toggle-pw" onclick="togglePassword('confirm_password','pw-icon2')">
+                        <i class="fas fa-eye" id="pw-icon2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">
+                <i class="fas fa-user-plus"></i>&nbsp; Create Account
+            </button>
+        </form>
+
+        <div class="divider">or</div>
+
+        <p class="register-link">
+            Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const container = document.getElementById('particles');
+        for (let i = 0; i < 25; i++) {
+            const span = document.createElement('span');
+            const size = Math.random() * 6 + 2;
+            span.style.width = size + 'px';
+            span.style.height = size + 'px';
+            span.style.left = Math.random() * 100 + '%';
+            span.style.animationDuration = Math.random() * 12 + 8 + 's';
+            span.style.animationDelay = Math.random() * 8 + 's';
+            container.appendChild(span);
+        }
+    })();
+
+    function togglePassword(inputId, iconId) {
+        const pw = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (pw.type === 'password') {
+            pw.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            pw.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+</script>
+</body>
+</html>
