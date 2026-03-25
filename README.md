@@ -40,8 +40,19 @@ Core goals:
 - Backend: Flask, SQLAlchemy, Flask-Login
 - Data store: MySQL
 - Queue/cache: Redis (Celery-ready workflow)
-- Scraping stack: Playwright, BeautifulSoup, utility crawlers
+- Extraction stack: Playwright, BeautifulSoup, utility crawlers for public web sources (e.g., business directories, professional listings)
 - AI stack: Local Ollama / LangExtract (primary), optional OpenAI-compatible or on-prem local model fallback
+
+### System Flow
+```mermaid
+flowchart LR
+    User([User]) -->|Triggers Extraction| Flask[Flask App]
+    Flask -->|Queues Task| Celery[Celery Workers]
+    Celery -->|Fetches Data| Scrapers[Public Web Sources]
+    Scrapers -->|Saves Records| DB[(MySQL DB)]
+    DB -->|Enriches| AI[AI Pipeline]
+    AI -->|Generates| Export[CSV / Excel / JSON]
+```
 
 ## AI and LLM Stack Used
 
@@ -65,9 +76,18 @@ This project uses the following AI/LLM components:
 
 Default design preference in this project is local-first AI to avoid cloud API key dependency.
 
-## Demo
+## Screenshots / Demo
 
-Demo available upon request.
+### Extraction Setup & Dashboard
+![Dashboard Setup](docs/assets/screenshot1.jpg)
+
+### Extraction Task Monitoring
+![Task Dashboard](docs/assets/screenshot2.jpg)
+
+### Results View
+![Results Page](docs/assets/screenshot3.jpg)
+
+*(Drag and drop your actual images into the GitHub editor to replace these placeholders!)*
 
 ## Project Structure
 
@@ -203,7 +223,7 @@ For production hardening, configure:
 
 ## License
 
-This repository currently has no explicit license file. Add a `LICENSE` file to define usage terms.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
