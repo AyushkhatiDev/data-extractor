@@ -15,14 +15,14 @@ Read the project paper directly from the repository:
 
 > ⚠️ **Note on Demo Usage**
 >
-> - The live demo is provided for **educational and demonstration purposes only**.
-> - Due to infrastructure and deployment constraints, extraction workflows may not function consistently in the hosted environment.
-> - In some cases, you may only be able to run limited extraction attempts before session restrictions apply.
-> - Certain features (especially multi-source extraction and LLM pipelines) may be **partially disabled or unstable** due to environment conflicts.
+> - This demo is provided for **educational and demonstration purposes only**.
+> - Due to **deployment and infrastructure constraints**, extraction workflows may not function consistently in the hosted environment.
+> - In some cases, extraction may be **limited to a single run per session** due to resource and session restrictions.
+> - Certain features (including multi-source extraction and LLM pipelines) may be **partially unavailable or unstable** due to environment conflicts.
 >
-> ⚙️ These limitations are specific to the hosted demo and **do not reflect the full capabilities of the system when run locally or in a properly configured environment**.
+> ⚙️ These limitations are specific to the deployed environment and **do not reflect the full capabilities of the system when run locally or in a properly configured setup**.
 >
-> 🚧 Fixes and stability improvements are currently in progress.
+> 🚧 Improvements and stability fixes are currently in progress.
 
 ## 🛠 Recommended Usage
 
