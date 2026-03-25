@@ -2,6 +2,13 @@
 
 A production-minded Flask platform for multi-source business/contact extraction with optional local AI enrichment, validation, and export workflows.
 
+## Paper
+
+Read the project paper directly from the repository:
+
+- [DataExtractor copy.pdf](paper/DataExtractor%20copy.pdf)
+- [DataExtractor.pdf](paper/DataExtractor.pdf)
+
 ## Important Notice
 
 - This Data Extractor project is for educational purposes only.
@@ -86,13 +93,6 @@ Default design preference in this project is local-first AI to avoid cloud API k
 
 ### Results View
 ![Results Page](docs/assets/d3.jpeg)
-
-## Paper
-
-Read the project paper directly from the repository:
-
-- [DataExtractor copy.pdf](paper/DataExtractor%20copy.pdf)
-- [DataExtractor.pdf](paper/DataExtractor.pdf)
 
 ## Project Structure
 
