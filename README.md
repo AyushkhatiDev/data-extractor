@@ -6,8 +6,8 @@ A production-minded Flask platform for multi-source business/contact extraction 
 
 Read the project paper directly from the repository:
 
-- [DataExtractor copy.pdf](paper/DataExtractor%20copy.pdf)
-- [DataExtractor.pdf](paper/DataExtractor.pdf)
+
+- [DataExtractor_Paper.pdf](paper/DataExtractor.pdf)
 
 ## 🌐 Live Demo
 
